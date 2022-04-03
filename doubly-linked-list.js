@@ -31,23 +31,41 @@ class DoublyLinkedList {
 
     // O(n)
     remove (index) {
-        if (index < 0 || index > this.#size) {
+        if (index < 0 || index > this.#size - 1) {
             throw new Error(`${index} is out of range!`)
         }
 
-        let current = this.#head
-        let prev = null
-
         if (index === 0) {
-            this.#head = current.next
+            this.#head = this.#head.next
+            this.#head.prev = null
+        }
+
+        if (index === this.#size - 1) {
+            this.#tail = this.#tail.prev
+            this.#tail.next = null
+
         } else {
-            // TODO починить функцию remove, чтобы она работала корректно
-            // Пример в getData
-            for (let i = 1; i <= index; i++)  {
-                prev = current
-                current = prev.next
-                if (index === i) {
-                    prev.next = current.next
+            const mid = Math.round(this.#size / 2)
+
+            if (index > mid) {
+                let current = this.#tail
+                for (let i = this.size - 2; i >= index; i--) {
+                    let next = current
+                    current = next.prev
+                    if (i === index) {
+                        current.prev.next = current.next
+                        current.next.prev = current.prev
+                    }
+                }
+
+            } else {
+                let current = this.#head
+                for (let i = 1; i <= index; i++) {
+                    let prev = current
+                    current = prev.next
+                    if (i === index) {
+                        prev.next = current.next
+                    }
                 }
             }
         }
@@ -57,10 +75,13 @@ class DoublyLinkedList {
 
     // O(n / 2)
     getData(index) {
+        if (index < 0 || index > this.#size) {
+            throw new Error(`${index} is out of range!`)
+        }
+
         const mid = Math.round(this.#size / 2)
 
         if (index > mid) {
-            // ищем с хвоста
             let current = this.#tail
             for (let i = this.#size - 1; i >= index; i--)  {
                 if (i === index) {
@@ -69,7 +90,6 @@ class DoublyLinkedList {
                 current = current.prev
             }
         } else {
-            // ищем с головы
             let current = this.#head
             for (let i = 0; i <= index; i++)  {
                 if (i === index) {
@@ -92,22 +112,42 @@ class DoublyLinkedList {
         return this.#head
     }
 
-    // TODO вернуть средний индекс списка
     get listMid () {
-        return this.#head
+        return Math.round((this.#size - 1) / 2)
     }
 
-    // TODO вернуть массив всех значений элементов
-    // direction - можеть быть 0 или 1
-    // Если 1, то результат должен быть упорядочен с head -> tail
-    // Если 0 то, tail -> head
     toArray(direction = 1) {
-        return []
+        let array = []
+        if (direction === 1) {
+            let current = this.#head
+
+            for(let i = 1; i <= this.#size; i++) {
+                let itemOfArray = current.data
+                array.push(itemOfArray)
+                current = current.next
+            }
+        } 
+        else if (direction === 0) {
+            let current = this.#tail
+
+            for(let i = this.#size; i > 0; i--) {
+                let itemOfArray = current.data
+                array.push(itemOfArray)
+                current = current.prev
+            }
+        } else {
+            throw new Error(`${direction} is out of range!`)
+        }
+        return array
     }
 
-    // TODO удалить все элементы, значение которых уже встретилось в связанном списке.
     removeDuplicates () {
-
+       const array = this.toArray()
+       array.filter((item, index) => {
+           if (array.indexOf(item) !== index) {
+            this.remove(index)
+           }
+       })
     }
 
     printList () {
@@ -122,19 +162,3 @@ class DoublyLinkedList {
         console.log(text)
     }
 }
-
-const linkedList = new DoublyLinkedList()
-linkedList.append(20) // 0
-linkedList.append(5) // 1
-linkedList.append(30) // 2
-linkedList.append(40) // 3
-linkedList.append(50) // 4
-linkedList.append(60) // 5
-linkedList.append(70) // 6
-
-const value = linkedList.getData(6)
-console.log('value', value)
-console.log('size', linkedList.size)
-console.log('head', linkedList.head)
-console.log('tail', linkedList.tail)
-linkedList.printList()
